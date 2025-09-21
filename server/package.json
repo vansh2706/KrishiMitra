@@ -1,0 +1,27 @@
+{
+  "name": "krishimitra-api",
+  "version": "1.0.0",
+  "description": "Backend API server for KrishiMitra application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "agriculture",
+    "api",
+    "nodejs",
+    "express"
+  ],
+  "author": "KrishiMitra Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
