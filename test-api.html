@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test NVIDIA NeMo API</title>
+</head>
+<body>
+    <h1>Test NVIDIA NeMo API</h1>
+    <button onclick="testEnv()">Test Environment Variables</button>
+    <button onclick="testNemo()">Test NVIDIA NeMo API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testEnv() {
+            try {
+                const response = await fetch('/api/test-env');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<pre>Error: ' + error.message + '</pre>';
+            }
+        }
+
+        async function testNemo() {
+            try {
+                const response = await fetch('/api/nemo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: 'user', content: 'Hello, how are you?' }
+                        ]
+                    }),
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<pre>Error: ' + error.message + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>
