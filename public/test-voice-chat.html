@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice & Chatbot API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.testing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .voice-button {
+            background: #007bff;
+            color: white;
+            border: 2px solid #0056b3;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .voice-button.listening {
+            background: #dc3545;
+            border-color: #c82333;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .error-result {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎙️ KrishiMitra Voice & API Test Suite</h1>
+
+    <!-- Voice Recognition Test -->
+    <div class="test-card">
+        <div class="test-header">
+            <h2>🎤 Voice Recognition Test</h2>
+            <span id="voiceStatus" class="status testing">Checking...</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <button id="voiceBtn" class="voice-button" title="Click to start voice input">
+                🎤
+            </button>
+            <div>
+                <p><strong>Instructions:</strong></p>
+                <p>1. Click the microphone button</p>
+                <p>2. Say something like "What is the best time to plant wheat?"</p>
+                <p>3. Your speech will be converted to text</p>
+            </div>
+        </div>
+
+        <div>
+            <label><strong>Recognized Text:</strong></label>
+            <textarea id="voiceResult" placeholder="Your speech will appear here..."></textarea>
+        </div>
+
+        <div id="voiceError" class="result error-result" style="display: none;"></div>
+    </div>
+
+    <!-- Chatbot API Test -->
+    <div class="test-card">
+        <div class="test-header">
+            <h2>🤖 Chatbot API Test</h2>
+            <span id="chatStatus" class="status testing">Ready</span>
+        </div>
+
+        <div>
+            <label><strong>Ask a farming question:</strong></label>
+            <input type="text" id="chatInput" placeholder="e.g., What is the best fertilizer for tomatoes?" />
+        </div>
+
+        <div>
+            <button onclick="testChatbot()" class="btn-primary">Send Question</button>
+            <button onclick="testVoiceAndChat()" class="btn-success">Voice + Chat Test</button>
+            <button onclick="clearChatResult()" class="btn-secondary">Clear</button>
+        </div>
+
+        <div id="chatResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- API Status Overview -->
+    <div class="test-card">
+        <div class="test-header">
+            <h2>📊 API Status Overview</h2>
+            <span id="overallStatus" class="status testing">Checking...</span>
+        </div>
+
+        <div id="apiStatusList">
+            <div>🔄 Running comprehensive tests...</div>
+        </div>
+
+        <button onclick="runAllTests()" class="btn-primary">Run All Tests</button>
+    </div>
+
+    <script>
+        // Voice Recognition Setup
+        let recognition = null;
+        let isListening = false;
+
+        function initVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+                recognition = new SpeechRecognition();
+
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-IN'; // Indian English
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('voiceResult').value = transcript;
+                    document.getElementById('chatInput').value = transcript;
+                    updateVoiceStatus('success', 'Voice recognized successfully!');
+                    stopListening();
+                };
+
+                recognition.onerror = (event) => {
+                    const errorDiv = document.getElementById('voiceError');
+                    errorDiv.textContent = 'Voice recognition error: ' + event.error;
+                    errorDiv.style.display = 'block';
+                    updateVoiceStatus('error', 'Recognition failed');
+                    stopListening();
+                };
+
+                recognition.onend = () => {
+                    stopListening();
+                };
+
+                updateVoiceStatus('success', 'Voice recognition available');
+                return true;
+            } else {
+                updateVoiceStatus('error', 'Voice recognition not supported');
+                return false;
+            }
+        }
+
+        function startListening() {
+            if (recognition && !isListening) {
+                isListening = true;
+                recognition.start();
+
+                const btn = document.getElementById('voiceBtn');
+                btn.classList.add('listening');
+                btn.textContent = '🔴';
+                btn.title = 'Click to stop recording';
+
+                updateVoiceStatus('testing', 'Listening...');
+                document.getElementById('voiceError').style.display = 'none';
+            }
+        }
+
+        function stopListening() {
+            if (recognition && isListening) {
+                isListening = false;
+                recognition.stop();
+
+                const btn = document.getElementById('voiceBtn');
+                btn.classList.remove('listening');
+                btn.textContent = '🎤';
+                btn.title = 'Click to start voice input';
+            }
+        }
+
+        function updateVoiceStatus(type, message) {
+            const status = document.getElementById('voiceStatus');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+
+        // Chatbot API Test
+        async function testChatbot() {
+            const input = document.getElementById('chatInput').value.trim();
+            if (!input) {
+                alert('Please enter a question first!');
+                return;
+            }
+
+            updateChatStatus('testing', 'Sending...');
+            const resultDiv = document.getElementById('chatResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div>🔄 Sending your question to AI advisor...</div>';
+
+            try {
+                // Test the chatbot by making a direct call to the frontend API
+                // This simulates what the EnhancedChatBot component does
+                const response = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        protocol: 'https',
+                        origin: 'api.openai.com',
+                        path: '/v1/chat/completions',
+                        method: 'POST',
+                        data: {
+                            model: 'gpt-4o-mini',
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: 'You are an expert agricultural advisor for Indian farmers. Provide practical farming advice.'
+                                },
+                                {
+                                    role: 'user',
+                                    content: input
+                                }
+                            ],
+                            temperature: 0.7,
+                            max_tokens: 500
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.choices && data.choices[0]) {
+                    const aiResponse = data.choices[0].message.content;
+                    resultDiv.innerHTML = `
+                        <div><strong>Your Question:</strong> ${input}</div>
+                        <div><strong>AI Response:</strong></div>
+                        <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 6px;">${aiResponse}</div>
+                    `;
+                    updateChatStatus('success', 'AI responded successfully');
+                } else {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div><strong>Error:</strong> ${error.message}</div>
+                    <div><strong>Suggestion:</strong> Check if OpenAI/Gemini API keys are configured in .env.local</div>
+                `;
+                resultDiv.classList.add('error-result');
+                updateChatStatus('error', 'API request failed');
+            }
+        }
+
+        function testVoiceAndChat() {
+            const voiceText = document.getElementById('voiceResult').value.trim();
+            if (!voiceText) {
+                alert('Please use voice input first to get some text!');
+                return;
+            }
+
+            document.getElementById('chatInput').value = voiceText;
+            testChatbot();
+        }
+
+        function updateChatStatus(type, message) {
+            const status = document.getElementById('chatStatus');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+
+        function clearChatResult() {
+            document.getElementById('chatResult').style.display = 'none';
+            document.getElementById('chatInput').value = '';
+            document.getElementById('voiceResult').value = '';
+            updateChatStatus('testing', 'Ready');
+        }
+
+        // Comprehensive API Testing
+        async function runAllTests() {
+            const statusDiv = document.getElementById('apiStatusList');
+            const overallStatus = document.getElementById('overallStatus');
+
+            overallStatus.className = 'status testing';
+            overallStatus.textContent = 'Testing...';
+
+            statusDiv.innerHTML = '<div>🔄 Running comprehensive API tests...</div>';
+
+            const tests = [
+                { name: 'Health API', url: '/api/health' },
+                { name: 'Proxy API', url: '/api/proxy' },
+                { name: 'Pest Detection API', test: testPestAPI },
+                { name: 'Voice Recognition', test: testVoiceAvailability }
+            ];
+
+            let results = [];
+            let html = '';
+
+            for (let test of tests) {
+                try {
+                    let success = false;
+                    if (test.url) {
+                        const response = await fetch(test.url);
+                        success = response.ok;
+                    } else if (test.test) {
+                        success = await test.test();
+                    }
+
+                    const status = success ? '✅' : '❌';
+                    results.push(success);
+                    html += `<div>${status} ${test.name}: ${success ? 'Working' : 'Failed'}</div>`;
+
+                } catch (error) {
+                    results.push(false);
+                    html += `<div>❌ ${test.name}: Error - ${error.message}</div>`;
+                }
+            }
+
+            const passedTests = results.filter(Boolean).length;
+            const totalTests = results.length;
+
+            html += `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">`;
+            html += `<strong>Summary: ${passedTests}/${totalTests} tests passed</strong>`;
+            html += `</div>`;
+
+            statusDiv.innerHTML = html;
+
+            if (passedTests === totalTests) {
+                overallStatus.className = 'status success';
+                overallStatus.textContent = 'All systems operational';
+            } else {
+                overallStatus.className = 'status error';
+                overallStatus.textContent = `${totalTests - passedTests} issues found`;
+            }
+        }
+
+        async function testPestAPI() {
+            const testImageData = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/wA8=';
+
+            const response = await fetch('/api/analyze-pest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    imageData: testImageData,
+                    language: 'en'
+                })
+            });
+
+            const data = await response.json();
+            return response.ok && data.success;
+        }
+
+        function testVoiceAvailability() {
+            return 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+        }
+
+        // Event Listeners
+        document.getElementById('voiceBtn').addEventListener('click', () => {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        });
+
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                testChatbot();
+            }
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            initVoiceRecognition();
+            runAllTests();
+        });
+    </script>
+</body>
+
+</html>

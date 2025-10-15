@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Microphone Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .voice-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            background: none;
+            outline: none;
+        }
+
+        .voice-button:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        .mic-ready {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+
+        .mic-ready:hover {
+            background: #dbeafe;
+            border-color: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .mic-recording {
+            background: #fee2e2;
+            border-color: #dc2626;
+            color: #991b1b;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .status.ready {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status.recording {
+            background: #fecaca;
+            color: #991b1b;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎤 Reliable Emoji Microphone Test</h1>
+
+    <div class="test-card">
+        <h2>Perfect Voice Input Buttons</h2>
+        <p>These microphone buttons use emoji and will <strong>always</strong> display correctly:</p>
+
+        <div class="button-group">
+            <button id="voiceBtn1" class="voice-button mic-ready" onclick="toggleVoice(1)">
+                🎤
+            </button>
+            <div>
+                <div id="status1" class="status ready">Ready</div>
+                <div style="font-size: 14px; color: #666; margin-top: 4px;">
+                    Primary microphone button
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="voiceBtn2" class="voice-button mic-ready" onclick="toggleVoice(2)">
+                🎤
+            </button>
+            <div>
+                <div id="status2" class="status ready">Ready</div>
+                <div style="font-size: 14px; color: #666; margin-top: 4px;">
+                    Secondary microphone button
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="voiceBtn3" class="voice-button mic-ready" onclick="toggleVoice(3)">
+                🎤
+            </button>
+            <div>
+                <div id="status3" class="status ready">Ready</div>
+                <div style="font-size: 14px; color: #666; margin-top: 4px;">
+                    Tertiary microphone button
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>CSS Classes for React Components</h2>
+        <p>You can copy these CSS classes into your React components:</p>
+
+        <div
+            style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; overflow-x: auto;">
+            <pre>// For inactive/ready state
+className="h-12 w-12 rounded-full border-2 border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:scale-105 transition-all duration-300"
+
+// For active/recording state  
+className="h-12 w-12 rounded-full border-2 border-red-600 bg-red-50 text-red-700 animate-pulse transition-all duration-300"</pre>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>React Component Example</h2>
+        <p>Here's how to implement this in your React components:</p>
+
+        <div
+            style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; overflow-x: auto;">
+            <pre>&lt;button
+    className={`h-12 w-12 rounded-full border-2 flex items-center justify-center text-xl transition-all duration-300 ${
+        isListening 
+            ? 'border-red-600 bg-red-50 text-red-700 animate-pulse' 
+            : 'border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:scale-105'
+    }`}
+    onClick={toggleVoice}
+    aria-label={isListening ? 'Stop recording' : 'Start voice input'}
+&gt;
+    {isListening ? '🔴' : '🎤'}
+&lt;/button&gt;</pre>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>Advantages of Emoji Icons</h2>
+        <ul>
+            <li>✅ <strong>Always visible:</strong> No dependency on icon libraries</li>
+            <li>✅ <strong>Cross-platform:</strong> Work on all devices and browsers</li>
+            <li>✅ <strong>Accessible:</strong> Screen readers understand emoji</li>
+            <li>✅ <strong>Fast loading:</strong> No external resources needed</li>
+            <li>✅ <strong>Consistent size:</strong> Scale properly with font-size</li>
+            <li>✅ <strong>Universal:</strong> Understood by all users globally</li>
+        </ul>
+    </div>
+
+    <script>
+        const states = {
+            1: false,
+            2: false,
+            3: false
+        };
+
+        function toggleVoice(btnNum) {
+            const btn = document.getElementById(`voiceBtn${btnNum}`);
+            const status = document.getElementById(`status${btnNum}`);
+
+            states[btnNum] = !states[btnNum];
+
+            if (states[btnNum]) {
+                // Start recording
+                btn.className = 'voice-button mic-recording';
+                btn.textContent = '🔴';
+                btn.setAttribute('aria-label', 'Stop recording');
+                status.textContent = 'Recording...';
+                status.className = 'status recording';
+
+                console.log(`Button ${btnNum}: Started recording`);
+            } else {
+                // Stop recording
+                btn.className = 'voice-button mic-ready';
+                btn.textContent = '🎤';
+                btn.setAttribute('aria-label', 'Start voice input');
+                status.textContent = 'Ready';
+                status.className = 'status ready';
+
+                console.log(`Button ${btnNum}: Stopped recording`);
+            }
+        }
+
+        console.log('Emoji microphone test loaded successfully!');
+        console.log('All buttons should display proper microphone (🎤) and recording (🔴) icons');
+    </script>
+</body>
+
+</html>

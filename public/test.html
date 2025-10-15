@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>KrishiMitra API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>KrishiMitra API Test</h1>
+
+    <button id="testBtn">Test API Routes</button>
+
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('testBtn').addEventListener('click', async function () {
+            const resultsDiv = document.getElementById('results');
+            const button = this;
+
+            button.disabled = true;
+            resultsDiv.innerHTML = '<div class="test-result loading">Testing API routes...</div>';
+
+            try {
+                // Test health check
+                const healthResponse = await fetch('/api/health-check');
+                const healthData = await healthResponse.json();
+
+                // Test Gemini API
+                const geminiResponse = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            {
+                                role: 'user',
+                                content: 'Hello, this is a test message'
+                            }
+                        ],
+                        model: 'gemini-2.5-flash',
+                        temperature: 0.7,
+                        maxTokens: 100
+                    }),
+                });
+
+                const geminiData = await geminiResponse.json();
+
+                resultsDiv.innerHTML = `
+                    <div class="test-result success">
+                        <h3>Health Check Result</h3>
+                        <pre>${JSON.stringify(healthData, null, 2)}</pre>
+                    </div>
+                    <div class="test-result ${geminiResponse.ok ? 'success' : 'error'}">
+                        <h3>Gemini API Result</h3>
+                        <p>Status: ${geminiResponse.status} (${geminiResponse.ok ? 'OK' : 'Error'})</p>
+                        <pre>${JSON.stringify(geminiData, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="test-result error">
+                        <h3>Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
